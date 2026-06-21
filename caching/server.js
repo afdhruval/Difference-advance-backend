@@ -2,26 +2,68 @@ import express, { json } from "express";
 import client from "./redis.js";
 import morgan from "morgan";
 import mongoose from "mongoose";
+import userModel from "./models/user.model.js";
 
 const app = express();
 app.use(morgan("dev"));
+
 app.use(express.json());
 
-async function connectRedis() {
-  await client.connect();
+function connections() {
+  async function connectRedis() {
+    await client.connect();
 
-  console.log("redis connected");
-}
-connectRedis();
+    console.log("redis connected");
+  }
+  connectRedis();
 
-const connect = async () => {
-  await mongoose.connect(process.env.MONGO_URI).then(() => {
-    console.log("connected to database");
+  const connect = async () => {
+    await mongoose.connect(process.env.MONGO_URI).then(() => {
+      console.log("connected to database");
+    });
+  };
+
+  connect();
+
+  app.listen(3000, () => {
+    console.log("server is running on 3000");
   });
-};
+}
 
-connect()
+app.post("/user", async (req, res) => {
+  const { username, password } = req.body;
 
-app.listen(3000, () => {
-  console.log("server is running on 3000");
+  const user = await userModel.create({
+    username,
+    password,
+  });
+  return res.status(200).json({
+    message: "success",
+    user,
+  });
 });
+
+app.get("/user", async (req, res) => {
+
+  const cacheResult = await client.get("user");
+  if (cacheResult) {
+    return res.status(200).json({
+      message: "success",
+      ...JSON.parse(cacheResult),
+    });
+  }
+
+
+
+  const user = await userModel.find();
+
+
+  await client.set("")
+
+  return res.status(200).json({
+    message: "success",
+    data: user,
+  });
+});
+
+connections();
