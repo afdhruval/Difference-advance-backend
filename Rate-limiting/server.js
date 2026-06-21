@@ -33,48 +33,27 @@ const globalRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-app.get("/userr", async (req, res) => {
-  const userFromCache = await redis.get("user ");
+app.get("/test", async (req, res) => {
+  const key = `rate_limit:${req.ip}`;
 
-  if (userFromCache) {
-    return res.status(200).json({
-      message: "data fetched from cache",
-      user: JSON.parse(userFromCache),
+  const requests = await redis.incr(key);
+
+  if (requests === 1) {
+    await redis.expire(key, 60);
+  }
+
+  if (requests > 5) {
+    const ttl = await redis.ttl(key);
+
+    return res.status(429).json({
+      message: "Too Many Requests",
+      retryAfter: ttl,
     });
   }
 
-  const user = await userModel.find();
-
-  await redis.set("user", JSON.stringify(user), "EX", 60 * 60 * 24);
-
   return res.status(200).json({
-    message: "data fetched succeessfullly",
-    user,
-  });
-});
-
-app.post("/user", async (req, res) => {
-  const { password, username } = req.body;
-
-  const user = await userModel.create({
-    username,
-    password,
-  });
-
-  return res.status(201).json({
-    message: "User created successfully",
-    user,
-  });
-});
-
-app.get("/", async (req, res) => {
-  let sum = 0;
-  for (let i = 0; i < 1000000000; i++) {
-    sum += i;
-  }
-  return res.status(200).json({
-    message: "Hello World",
-    sum,
+    message: "Request Allowed",
+    count: requests,
   });
 });
 
