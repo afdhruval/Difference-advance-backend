@@ -44,21 +44,19 @@ app.post("/user", async (req, res) => {
 });
 
 app.get("/user", async (req, res) => {
-
   const cacheResult = await client.get("user");
   if (cacheResult) {
     return res.status(200).json({
-      message: "success",
-      ...JSON.parse(cacheResult),
+      message: "data come from cache",
+      data: JSON.parse(cacheResult),
     });
   }
 
-
-
   const user = await userModel.find();
 
-
-  await client.set("")
+  await client.set("user", JSON.stringify(user), {
+    EX : 10,
+  });
 
   return res.status(200).json({
     message: "success",
