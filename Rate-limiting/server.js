@@ -31,7 +31,7 @@ const globalRateLimit = rateLimit({
   statusCode: 429,
   standardHeaders: true,
   legacyHeaders: false,
-});
+});                                                                
 
 app.get("/test", async (req, res) => {
   const key = `rate_limit:${req.ip}`;
