@@ -14,7 +14,7 @@ const userSchema = mongoose.Schema({
 });
 
 
-const userMOdel = mongoose.model("usress",userSchema)
+const userMOdel = mongoose.model("atrtoken",userSchema)
 
 
 export default userMOdel
