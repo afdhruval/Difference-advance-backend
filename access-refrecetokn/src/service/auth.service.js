@@ -1,3 +1,7 @@
+import userMOdel from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+import generateToken from "../utils/generateToken.js";
+
 const registerService = async (data) => {
   const { username, email, password } = data;
 
@@ -25,8 +29,14 @@ const registerService = async (data) => {
     password,
   });
 
-  let accessToken = generateAceessToken(user._id);
-  let refreshToken = generateRefreshToken(user._id);
+  let accessToken = generateToken.generateAceessToken(user._id);
+  let refreshToken = generateToken.generateRefreshToken(user._id);
+
+  return {
+    accessToken,
+    refreshToken,
+    user,
+  };
 };
 
 export default {
