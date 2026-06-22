@@ -9,8 +9,19 @@ const register = async (req, res) => {
     req.body,
   );
 
-  const accesssToken = generateToken.generateAccessToken(user._id);
-  const RefreshToken = generateToken.generateRefreshToken(user._id);
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 10 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
+  });
 
   return res.status(201).json({
     message: "use registered successfully",
