@@ -29,7 +29,29 @@ const register = async (req, res) => {
   });
 };
 
-const login = async (req, res) => {};
+const login = async (req, res) => {
+  const { accessToken, refreshToken, isUserExisted } =
+    await authService.loginService(req.body);
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 10 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
+  return res.status(201).json({
+    message: "user loggedIn",
+    user: isUserExisted,
+  });
+};
 
 export default {
   register,
