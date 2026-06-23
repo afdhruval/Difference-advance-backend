@@ -13,7 +13,7 @@ const registerService = async (data) => {
   }
 
   let isUserExisted = await userMOdel.findOne({
-    $or: [{ username }, { email }],
+    email,
   });
 
   if (isUserExisted) {
@@ -22,12 +22,12 @@ const registerService = async (data) => {
     });
   }
 
-  const hashPass = await bcrypt.hash("password", 10);
+  const hashPass = await bcrypt.hash(password.toString(), 10);
 
   const user = await userMOdel.create({
     username,
     email,
-    password,
+    password: hashPass,
   });
 
   let accessToken = generateToken.generateAceessToken(user._id);
@@ -48,7 +48,6 @@ const loginService = async (data) => {
       message: "all field are required",
     });
   }
-  console.log(password);
 
   const isUserExisted = await userMOdel.findOne({
     email,
@@ -60,10 +59,16 @@ const loginService = async (data) => {
     });
   }
 
-  const isMatch = await bcrypt.compare("password", isUserExisted.password);
+  const isMatch = await bcrypt.compare(
+    password.toString(),
+    isUserExisted.password,
+  );
+
 
   if (!isMatch) {
-    throw new Error("Password is incorrect");
+    return res.status(400).json({
+      message: "password incorrect",
+    });
   }
 
   let accessToken = generateToken.generateAceessToken(isUserExisted._id);
