@@ -3,7 +3,7 @@ import authMiddleware from "../middleware/auth.middleware.js"
 
 const homeRouter = express.Router();
 
-homeRouter.get("/", (req, res) => {
+homeRouter.get("/", authMiddleware, (req, res) => {
   return res.status(200).json({
     message: "Home fetched",
   });

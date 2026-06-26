@@ -17,9 +17,7 @@ const registerService = async (data) => {
   });
 
   if (isUserExisted) {
-    return res.status(409).json({
-      message: "user already exists",
-    });
+    throw new Error("user already exists")
   }
 
   const hashPass = await bcrypt.hash(password.toString(), 10);
@@ -32,6 +30,10 @@ const registerService = async (data) => {
 
   let accessToken = generateToken.generateAceessToken(user._id);
   let refreshToken = generateToken.generateRefreshToken(user._id);
+
+  user.refreshToken = refreshToken
+
+  await user.save();
 
   return {
     accessToken,
@@ -74,6 +76,11 @@ const loginService = async (data) => {
   let accessToken = generateToken.generateAceessToken(isUserExisted._id);
   let refreshToken = generateToken.generateRefreshToken(isUserExisted._id);
 
+
+  isUserExisted.refreshToken = refreshToken
+
+  await isUserExisted.save();
+
   return {
     accessToken,
     refreshToken,
@@ -81,7 +88,13 @@ const loginService = async (data) => {
   };
 };
 
+const generateAccesTokenService = async (data) => {
+
+
+}
+
 export default {
   registerService,
   loginService,
+  generateAccesTokenService
 };

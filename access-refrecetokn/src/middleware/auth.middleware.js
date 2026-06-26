@@ -2,30 +2,41 @@ import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import userMOdel from "../models/user.model.js";
 
-const authMiddleware = async (req, res) => {
+const authMiddleware = async (req, res, next) => {
   try {
-    const accesstoken = res.cookie.accesstoken;
+    const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
-    if (!accesstoken) {
-      return res.status(409).json({
-        message: "Unauthorized accesss",
+    if (!accessToken) {
+      return res.status(401).json({
+        message: "Unauthorized access: No access token provided",
       });
-
-      const decoded = await jwt.verify(accesstoken, config.JWT_Access_Token);
-
-      if (!decoded)
-        return res.status(409).json({
-          message: "Unauthorized accesss",
-        });
-
-      const user = await userMOdel.findById(decoded._id);
-
-      req.user = user;
-
-      next();
     }
+
+    const decoded = jwt.verify(accessToken, config.JWT_Access_Token);
+
+    
+
+    if (!decoded) {
+      return res.status(401).json({
+        message: "Unauthorized access: Invalid token",
+      });
+    }
+
+    const user = await userMOdel.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({
+        message: "Unauthorized access: User not found",
+      });
+    }
+
+    req.user = user;
+    next();
   } catch (error) {
-    throw new Error(error);
+    return res.status(401).json({
+      message: "Unauthorized access: Invalid or expired token",
+      error: error.message
+    });
   }
 };
 

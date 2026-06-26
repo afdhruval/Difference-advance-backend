@@ -3,6 +3,9 @@ import authController from "../controller/auth.controller.js";
 const authRouter = express.Router();
 
 authRouter.post("/register", authController.register);
+
+// authRouter.get("/get-accessToken", ) 
+
 authRouter.post("/login", authController.login);
 
 export default authRouter;

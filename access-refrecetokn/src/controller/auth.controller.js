@@ -53,6 +53,19 @@ const login = async (req, res) => {
   });
 };
 
+const generateAcessToken = async(req,res)=>{
+  const refreshToken = req.cookies.refreshToken 
+
+  if(!refreshToken){
+    return res.status(401).json({
+      message : "Unauthorized : No refresh token provided"
+    })
+  }
+
+  let result = await authService.generateAccesTokenService(refreshToken)
+
+}
+
 export default {
   register,
   login,
