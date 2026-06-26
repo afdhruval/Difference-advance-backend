@@ -4,7 +4,9 @@ import userMOdel from "../models/user.model.js";
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+    const accessToken =
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
     if (!accessToken) {
       return res.status(401).json({
@@ -13,9 +15,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(accessToken, config.JWT_Access_Token);
-
     
-
     if (!decoded) {
       return res.status(401).json({
         message: "Unauthorized access: Invalid token",
@@ -23,7 +23,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const user = await userMOdel.findById(decoded.id);
-    
+
     if (!user) {
       return res.status(401).json({
         message: "Unauthorized access: User not found",
@@ -35,7 +35,7 @@ const authMiddleware = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       message: "Unauthorized access: Invalid or expired token",
-      error: error.message
+      error: error.message,
     });
   }
 };

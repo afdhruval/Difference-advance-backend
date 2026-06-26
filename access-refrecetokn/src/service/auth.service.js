@@ -2,6 +2,7 @@ import userMOdel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 import config from "../config/config.js";
+import jwt from "jsonwebtoken";
 
 const registerService = async (data) => {
   const { username, email, password } = data;
@@ -17,7 +18,7 @@ const registerService = async (data) => {
   });
 
   if (isUserExisted) {
-    throw new Error("user already exists")
+    throw new Error("user already exists");
   }
 
   const hashPass = await bcrypt.hash(password.toString(), 10);
@@ -31,7 +32,7 @@ const registerService = async (data) => {
   let accessToken = generateToken.generateAceessToken(user._id);
   let refreshToken = generateToken.generateRefreshToken(user._id);
 
-  user.refreshToken = refreshToken
+  user.refreshToken = refreshToken;
 
   await user.save();
 
@@ -66,7 +67,6 @@ const loginService = async (data) => {
     isUserExisted.password,
   );
 
-
   if (!isMatch) {
     return res.status(400).json({
       message: "password incorrect",
@@ -76,8 +76,7 @@ const loginService = async (data) => {
   let accessToken = generateToken.generateAceessToken(isUserExisted._id);
   let refreshToken = generateToken.generateRefreshToken(isUserExisted._id);
 
-
-  isUserExisted.refreshToken = refreshToken
+  isUserExisted.refreshToken = refreshToken;
 
   await isUserExisted.save();
 
@@ -90,11 +89,25 @@ const loginService = async (data) => {
 
 const generateAccesTokenService = async (data) => {
 
+  const decode = jwt.verify(data.refreshToken, config.JWT_Refresh_Token);
 
-}
+  if (!decode) {
+    throw new Error("unautorized");
+  }
+
+  const user = await userMOdel.findById(decode.id);
+
+  if (refreshToken !== user.refreshToken) {
+    throw new Error("Unauthorized");
+  }
+
+  const accessToken = generateToken.generateAceessToken(user._id);
+
+  return accessToken; 
+};
 
 export default {
   registerService,
   loginService,
-  generateAccesTokenService
+  generateAccesTokenService,
 };

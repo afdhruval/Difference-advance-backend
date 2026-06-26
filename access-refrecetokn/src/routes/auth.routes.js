@@ -4,7 +4,7 @@ const authRouter = express.Router();
 
 authRouter.post("/register", authController.register);
 
-// authRouter.get("/get-accessToken", ) 
+authRouter.get("/get-accessToken", authController.generateAcessToken) 
 
 authRouter.post("/login", authController.login);
 

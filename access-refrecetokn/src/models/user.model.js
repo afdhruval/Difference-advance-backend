@@ -11,10 +11,11 @@ const userSchema = mongoose.Schema({
   password: {
     type: String,
   },
+  refreshToken: {
+    type: String,
+  },
 });
 
+const userMOdel = mongoose.model("atrtoken", userSchema);
 
-const userMOdel = mongoose.model("atrtoken",userSchema)
-
-
-export default userMOdel
+export default userMOdel;

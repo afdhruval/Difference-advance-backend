@@ -53,20 +53,31 @@ const login = async (req, res) => {
   });
 };
 
-const generateAcessToken = async(req,res)=>{
-  const refreshToken = req.cookies.refreshToken 
+const generateAcessToken = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
 
-  if(!refreshToken){
+  if (!refreshToken) {
     return res.status(401).json({
-      message : "Unauthorized : No refresh token provided"
-    })
+      message: "Unauthorized : No refresh token provided",
+    });
   }
 
-  let result = await authService.generateAccesTokenService(refreshToken)
+  let accessToken = await authService.generateAccesTokenService(refreshToken);
 
-}
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+    maxAge: 10 * 60 * 1000,
+  });
+
+  return res.status(200).json({
+    message: "Access token generated",
+  });
+};
 
 export default {
   register,
   login,
+  generateAcessToken
 };
