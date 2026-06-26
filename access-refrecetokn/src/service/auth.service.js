@@ -87,23 +87,27 @@ const loginService = async (data) => {
   };
 };
 
-const generateAccesTokenService = async (data) => {
-
-  const decode = jwt.verify(data.refreshToken, config.JWT_Refresh_Token);
-
-  if (!decode) {
-    throw new Error("unautorized");
+const generateAccesTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new Error("Refresh token is required");
   }
 
-  const user = await userMOdel.findById(decode.id);
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, config.JWT_Refresh_Token);
+  } catch (error) {
+    throw new Error("Unauthorized");
+  }
 
-  if (refreshToken !== user.refreshToken) {
+  const user = await userMOdel.findById(decoded.id);
+
+  if (!user || refreshToken !== user.refreshToken) {
     throw new Error("Unauthorized");
   }
 
   const accessToken = generateToken.generateAceessToken(user._id);
 
-  return accessToken; 
+  return accessToken;
 };
 
 export default {

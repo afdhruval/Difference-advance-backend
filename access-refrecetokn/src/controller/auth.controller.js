@@ -30,8 +30,9 @@ const register = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { accessToken, refreshToken, isUserExisted } =
-    await authService.loginService(req.body);
+  const { accessToken, refreshToken, user } = await authService.loginService(
+    req.body,
+  );
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
@@ -49,7 +50,7 @@ const login = async (req, res) => {
 
   return res.status(201).json({
     message: "user loggedIn",
-    user: isUserExisted,
+    user,
   });
 };
 
